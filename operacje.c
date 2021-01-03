@@ -1,19 +1,21 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
+#include "struktura.h"
+
 
 /************************************************************************************
  * Funkcja wczytuje obraz PGM z pliku do tablicy       	       	       	       	    *
- *										                                            *
- * \param[in] plik_we uchwyt do pliku z obrazem w formacie PGM			            *
- * \param[out] obraz_pgm tablica, do ktorej zostanie zapisany obraz		            *
- * \param[out] wymx szerokosc obrazka						                        *
- * \param[out] wymy wysokosc obrazka						                        *
- * \param[out] szarosci liczba odcieni szarosci					                    *
- * \return liczba wczytanych pikseli						                        *
+ *										                                                              *
+ * \param[in] plik_we uchwyt do pliku z obrazem w formacie PGM			                *
+ * \param[out] obraz_pgm tablica, do ktorej zostanie zapisany obraz		              *
+ * \param[out] wymx szerokosc obrazka						                                    *
+ * \param[out] wymy wysokosc obrazka						                                    *
+ * \param[out] szarosci liczba odcieni szarosci					                            *
+ * \return liczba wczytanych pikseli						                                    *
  ************************************************************************************/
 
-int czytaj(FILE *plik_we,int obraz_pgm[][MAX],int *wymx,int *wymy, int *szarosci)
+int czytaj(FILE *plik_we, t_obraz *obraz)
 {
   char buf[DL_LINII];      /* bufor pomocniczy do czytania naglowka i komentarzy */
   int znak;                /* zmienna pomocnicza do czytania komentarzy */
@@ -46,21 +48,42 @@ int czytaj(FILE *plik_we,int obraz_pgm[][MAX],int *wymx,int *wymy, int *szarosci
   } while (znak=='#' && !koniec);   /* Powtarzaj dopoki sa linie komentarza */
                                     /* i nie nastapil koniec danych         */
 
+  if (obraz->obraz_pgm != NULL) /*zwalnianie pamieci, jesli byla wczesniej zaalokowana*/
+  {                             /*taka sytuacja moze nastapic gdy wczytujemy obraz do pamieci*/
+    for (i = 0; i < obraz->wymy; i++) /*kolejny, n-ty raz*/
+    {
+      for (i = 0; i < obraz->wymx; i++)
+      {
+        free(obraz->obraz_pgm[i][j]);
+      }   
+    }
+  }
+
   /* Pobranie wymiarow obrazu i liczby odcieni szarosci */
-  if (fscanf(plik_we,"%d %d %d",wymx,wymy,szarosci)!=3) {
+  if (fscanf(plik_we,"%d %d %d", obraz->wymx, obraz->wymy, obraz->szarosci)!=3) {
     fprintf(stderr,"Blad: Brak wymiarow obrazu lub liczby stopni szarosci\n");
     return(0);
   }
+  
+
+  /*alokacja miejsca w pamieci dla obrazu*/
+  obraz->obraz_pgm = (int **) malloc((obraz->wymy) * sizeof(int*)); /*alokacja indeksów wierszy*/
+  for (i = 0; i < (obraz->wymy); i++) /*alokacja odpowiedniej liczby kolumn dla wszystkich wierszy*/
+  {
+    obraz->obraz_pgm = (int *) malloc((obraz->wymx) * sizeof(int)); 
+  }
+  
+
   /* Pobranie obrazu i zapisanie w tablicy obraz_pgm*/
-  for (i=0;i<*wymy;i++) {
-    for (j=0;j<*wymx;j++) {
-      if (fscanf(plik_we,"%d",&(obraz_pgm[i][j]))!=1) {
+  for (i=0;i<obraz->wymy;i++) {
+    for (j=0;j<obraz->wymx;j++) {
+      if (fscanf(plik_we,"%d", (&obraz->obraz_pgm[i][j]))!=1) {
 	fprintf(stderr,"Blad: Niewlasciwe wymiary obrazu\n");
 	return(0);
       }
     }
   }
-  return *wymx**wymy;   /* Czytanie zakonczone sukcesem    */
+  return (obraz->wymx)*(obraz->wymy);   /* Czytanie zakonczone sukcesem    */
 }                       /* Zwroc liczbe wczytanych pikseli */
 
 /************************************************************************************
@@ -73,7 +96,7 @@ int czytaj(FILE *plik_we,int obraz_pgm[][MAX],int *wymx,int *wymy, int *szarosci
  * \param[in] szarosci liczba odcieni szarosci					                    *
  * \return (0) dla bledu, 1 dla poprawnej sytuacji			                        *
  ************************************************************************************/
-int zapisz(FILE *plik_wy, int obraz_pgm [][MAX], int *wymx, int *wymy, int szarosci)
+int zapisz(FILE *plik_wy, t_obraz *obraz)
 {
     int i, j;
 
@@ -84,11 +107,11 @@ int zapisz(FILE *plik_wy, int obraz_pgm [][MAX], int *wymx, int *wymy, int szaro
     }
     
     fprintf(plik_wy, "P2\n");
-    fprintf(plik_wy, "%d %d %d", *wymx, *wymy, szarosci);
+    fprintf(plik_wy, "%d %d %d", obraz->wymx, obraz->wymy, obraz->szarosci);
     fprintf(plik_wy, "\n");
-    for (i=0; i<*wymy; ++i){
-        for (j=0; j<*wymx; ++j){
-            fprintf(plik_wy, "%d ", (obraz_pgm [i][j]));
+    for (i=0; i<obraz->wymy; ++i){
+        for (j=0; j<obraz->wymx; ++j){
+            fprintf(plik_wy, "%d ", (obraz->obraz_pgm [i][j]));
         }
         fprintf(plik_wy, "\n");
     }

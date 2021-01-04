@@ -16,6 +16,9 @@ typedef struct {
 typedef struct {
     int wymx, wymy, szarosci;
     int **obraz_pgm;
+    int **red;
+    int **green;
+    int **blue;
 } t_obraz;
 
 

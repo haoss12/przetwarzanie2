@@ -35,6 +35,8 @@ int czytaj(FILE *plik_we, t_obraz *obraz)
   
   
   if ( (buf[0]=='P') && (buf[1]=='2')) {  /* Czy jest magiczne "P2"? */
+    obraz->typobrazu = PGM;
+    
     /* Pominiecie komentarzy */
   do {
     if ((znak=fgetc(plik_we))=='#') {         /* Czy linia rozpoczyna sie od znaku '#'? */
@@ -82,6 +84,9 @@ int czytaj(FILE *plik_we, t_obraz *obraz)
   }
   
   if ( (buf[0]=='P') && (buf[1]=='3')) {  /* Czy jest magiczne "P3"? */
+    obraz->typobrazu = PPM;
+    obraz->kanal = KANAL;
+    
     /* Pominiecie komentarzy */
   do {
     if ((znak=fgetc(plik_we))=='#') {         /* Czy linia rozpoczyna sie od znaku '#'? */
@@ -93,12 +98,26 @@ int czytaj(FILE *plik_we, t_obraz *obraz)
   } while (znak=='#' && !koniec);   /* Powtarzaj dopoki sa linie komentarza */
                                     /* i nie nastapil koniec danych         */
 
-  if (obraz->obraz_pgm != NULL)     /*zwalnianie pamieci, jesli byla wczesniej zaalokowana*/
+  if (obraz->red != NULL)     /*zwalnianie pamieci, jesli byla wczesniej zaalokowana*/
   {                                 /*taka sytuacja moze nastapic gdy wczytujemy obraz do pamieci*/
     for(i=0; i<obraz->wymy; i++){   /*kolejny, n-ty raz*/
-          free(obraz->obraz_pgm[i]);    /*zwolnienie poszczegolnych wierszy*/
+          free(obraz->red[i]);    /*zwolnienie poszczegolnych wierszy*/
         }
-        free(obraz->obraz_pgm);         /*zwolnienie indeksow*/
+        free(obraz->red);         /*zwolnienie indeksow*/
+  }
+  if (obraz->green != NULL)     /*zwalnianie pamieci, jesli byla wczesniej zaalokowana*/
+  {                                 /*taka sytuacja moze nastapic gdy wczytujemy obraz do pamieci*/
+    for(i=0; i<obraz->wymy; i++){   /*kolejny, n-ty raz*/
+          free(obraz->green[i]);    /*zwolnienie poszczegolnych wierszy*/
+        }
+        free(obraz->green);         /*zwolnienie indeksow*/
+  }
+  if (obraz->blue != NULL)     /*zwalnianie pamieci, jesli byla wczesniej zaalokowana*/
+  {                                 /*taka sytuacja moze nastapic gdy wczytujemy obraz do pamieci*/
+    for(i=0; i<obraz->wymy; i++){   /*kolejny, n-ty raz*/
+          free(obraz->blue[i]);    /*zwolnienie poszczegolnych wierszy*/
+        }
+        free(obraz->blue);         /*zwolnienie indeksow*/
   }
 
   /* Pobranie wymiarow obrazu i liczby odcieni szarosci */
@@ -109,17 +128,27 @@ int czytaj(FILE *plik_we, t_obraz *obraz)
   
 
   /*alokacja miejsca w pamieci dla obrazu*/
-  obraz->obraz_pgm = (int **) malloc((obraz->wymy) * sizeof(int*)); /*alokacja indeksów wierszy*/
+  obraz->red = (int **) malloc((obraz->wymy) * sizeof(int*)); /*alokacja indeksów wierszy*/
   for (i = 0; i < (obraz->wymy); i++) /*alokacja odpowiedniej liczby kolumn dla wszystkich wierszy*/
   {
-    obraz->obraz_pgm[i] = (int *) malloc((obraz->wymx) * sizeof(int)); 
+    obraz->red[i] = (int *) malloc((obraz->wymx) * sizeof(int)); 
+  }
+  obraz->green = (int **) malloc((obraz->wymy) * sizeof(int*)); /*alokacja indeksów wierszy*/
+  for (i = 0; i < (obraz->wymy); i++) /*alokacja odpowiedniej liczby kolumn dla wszystkich wierszy*/
+  {
+    obraz->green[i] = (int *) malloc((obraz->wymx) * sizeof(int)); 
+  }
+  obraz->blue = (int **) malloc((obraz->wymy) * sizeof(int*)); /*alokacja indeksów wierszy*/
+  for (i = 0; i < (obraz->wymy); i++) /*alokacja odpowiedniej liczby kolumn dla wszystkich wierszy*/
+  {
+    obraz->blue[i] = (int *) malloc((obraz->wymx) * sizeof(int)); 
   }
   
 
-  /* Pobranie obrazu i zapisanie w tablicy obraz_pgm*/
+  /* Pobranie obrazu i zapisanie w poszczegolnych tablicach*/
   for (i=0;i<obraz->wymy;i++) {
     for (j=0;j<obraz->wymx;j++) {
-      if (fscanf(plik_we,"%d", (&obraz->obraz_pgm[i][j]))!=1) {
+      if (fscanf(plik_we,"%d %d %d", (&obraz->red[i][j]),(&obraz->green[i][j]),(&obraz->blue[i][j]))!=3) {
 	fprintf(stderr,"Blad: Niewlasciwe wymiary obrazu\n");
 	return(0);
       }
@@ -138,13 +167,13 @@ int czytaj(FILE *plik_we, t_obraz *obraz)
 
 /************************************************************************************
  * Funckja zapisujaca plik pod wybrana przez uzytkownika nazwa 	       	       	    *
- *										                                            *
- * \param[out] plik_wy uchwyt do pliku do zapisu obrazu w PGM			            *
+ *										                                                              *
+ * \param[out] plik_wy uchwyt do pliku do zapisu obrazu w PGM			                  *
  * \param[in] obraz_pgm tablica, w ktorej znajduje sie obraz do zapisu	            *
- * \param[in] wymx szerokosc obrazka						                        *
- * \param[in] wymy wysokosc obrazka				    		                        *
- * \param[in] szarosci liczba odcieni szarosci					                    *
- * \return (0) dla bledu, 1 dla poprawnej sytuacji			                        *
+ * \param[in] wymx szerokosc obrazka						                                    *
+ * \param[in] wymy wysokosc obrazka				    		                                  *
+ * \param[in] szarosci liczba odcieni szarosci					                            *
+ * \return (0) dla bledu, 1 dla poprawnej sytuacji			                            *
  ************************************************************************************/
 int zapisz(FILE *plik_wy, t_obraz *obraz)
 {
@@ -155,7 +184,8 @@ int zapisz(FILE *plik_wy, t_obraz *obraz)
         fprintf(stderr,"Blad: Nie podano uchwytu do pliku\n");
         return(0);
     }
-    
+    if (obraz->typobrazu == PGM)
+    {
     fprintf(plik_wy, "P2\n");
     fprintf(plik_wy, "%d %d %d", obraz->wymx, obraz->wymy, obraz->szarosci);
     fprintf(plik_wy, "\n");
@@ -171,6 +201,26 @@ int zapisz(FILE *plik_wy, t_obraz *obraz)
     }
 
     return 1;
+    }
+    if (obraz->typobrazu == PPM)
+    {
+    fprintf(plik_wy, "P3\n");
+    fprintf(plik_wy, "%d %d %d", obraz->wymx, obraz->wymy, obraz->szarosci);
+    fprintf(plik_wy, "\n");
+    for (i=0; i<obraz->wymy; ++i){
+        for (j=0; j<obraz->wymx; ++j){
+            fprintf(plik_wy, "%d %d %d ", (obraz->red [i][j]), (obraz->green [i][j]), (obraz->blue [i][j]));
+            if (j%MAXLINIA == 0 && j != 0)
+            {
+              fprintf(plik_wy, "\n");
+            }
+            
+        }
+    }
+
+    return 1;
+    }
+    
 }
 
 /* Wyswietlenie obrazu o zadanej nazwie za pomoca programu "display"   */

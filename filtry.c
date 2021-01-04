@@ -17,6 +17,9 @@
 void negatyw(t_obraz *obraz)
 {  
     int i, j;
+    
+    if (obraz->typobrazu == PGM)
+    {
         for (i=0; i<obraz->wymy; ++i)
         {
             for (j=0; j<obraz->wymx; ++j)
@@ -24,6 +27,41 @@ void negatyw(t_obraz *obraz)
             obraz->obraz_pgm [i][j] = obraz->szarosci - obraz->obraz_pgm [i][j]; /*odbicie wartosci koloru piksela na przeciwna strone tabeli*/
             }
         }
+    }
+    
+    if (obraz->typobrazu == PPM)
+    {
+        if (obraz->kanal == KANAL || obraz->kanal == RED)
+        {
+            for (i=0; i<obraz->wymy; ++i)
+            {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+            obraz->red [i][j] = obraz->szarosci - obraz->red [i][j]; /*odbicie wartosci koloru piksela na przeciwna strone tabeli*/
+            }
+            }
+        }
+        if (obraz->kanal == KANAL || obraz->kanal == GREEN)
+        {
+            for (i=0; i<obraz->wymy; ++i)
+            {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+            obraz->green [i][j] = obraz->szarosci - obraz->green [i][j]; /*odbicie wartosci koloru piksela na przeciwna strone tabeli*/
+            }
+            }
+        }
+        if (obraz->kanal == KANAL || obraz->kanal == GREEN)
+        {
+            for (i=0; i<obraz->wymy; ++i)
+            {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+            obraz->blue [i][j] = obraz->szarosci - obraz->blue [i][j]; /*odbicie wartosci koloru piksela na przeciwna strone tabeli*/
+            }
+            }
+        }
+    } 
 }
 
 /************************************************************************************
@@ -43,6 +81,8 @@ void progowanie(t_obraz *obraz, int procprog)
                             /*jest to wybrany przez uzytkownika procent z maksymalnej wartosci szarosci*/
         wartprog = ((procprog*obraz->szarosci)/100);
 
+        if (obraz->typobrazu == PGM)
+        {
         for (i=0; i<obraz->wymy; ++i)
         {
             for (j=0; j<obraz->wymx; ++j)
@@ -58,6 +98,66 @@ void progowanie(t_obraz *obraz, int procprog)
                 }
             }
         }
+        }
+
+        if (obraz->typobrazu == PPM)
+        {
+        if (obraz->kanal == KANAL || obraz->kanal == RED)
+        {
+           for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (obraz->red [i][j] <= wartprog) //progowanie "w dol", do czerni
+                {
+                    obraz->red [i][j] = 0;
+                }
+                
+                if (obraz->red [i][j] > wartprog) //progowanie "w gore", do bieli
+                {
+                    obraz->red [i][j] = obraz->szarosci;
+                }
+            }
+        } 
+        }
+        if (obraz->kanal == KANAL || obraz->kanal == GREEN)
+        {
+           for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (obraz->green [i][j] <= wartprog) //progowanie "w dol", do czerni
+                {
+                    obraz->green [i][j] = 0;
+                }
+                
+                if (obraz->green [i][j] > wartprog) //progowanie "w gore", do bieli
+                {
+                    obraz->green [i][j] = obraz->szarosci;
+                }
+            }
+        }             
+        }
+        if (obraz->kanal == KANAL || obraz->kanal == BLUE)
+        {
+           for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (obraz->blue [i][j] <= wartprog) //progowanie "w dol", do czerni
+                {
+                    obraz->blue [i][j] = 0;
+                }
+                
+                if (obraz->blue [i][j] > wartprog) //progowanie "w gore", do bieli
+                {
+                    obraz->blue [i][j] = obraz->szarosci;
+                }
+            }
+        }             
+        }
+        }
+        
 }
 
 /************************************************************************************
@@ -73,8 +173,9 @@ void progowanie(t_obraz *obraz, int procprog)
 void konturowanie(t_obraz *obraz)
 {
     int i, j;
-
-        for (i=0; i<obraz->wymy; ++i)  
+    if (obraz->typobrazu == PGM)
+    {
+    for (i=0; i<obraz->wymy; ++i)  
         {
             for (j=0; j<obraz->wymx; ++j)
             {
@@ -109,7 +210,130 @@ void konturowanie(t_obraz *obraz)
                     /*konturowanie wedlug wzoru z pliku obrazy_filtry.pdf, abs (int) to wart. bezwzgledna z int*/
                 } 
             }
+        }        
+    }
+
+printf("dupa");
+
+    if (obraz->typobrazu == PPM)
+    {
+        if (obraz->kanal == KANAL || obraz->kanal == RED)
+        {
+        {
+            printf("dupa");
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (i==((obraz->wymy)-1))        /*wyjatek dla dolnych krawedzi obrazu*/
+                {
+                    if (j==((obraz->wymx)-1))    /*wyjatek dla rogu obrazu*/
+                    {
+                        obraz->red [i][j] = 0;
+                    }
+                    else
+                    {
+                        obraz->red [i][j] = (abs(obraz->red [i][j+1]-obraz->red [i][j])); /*wyjatek dla dolnej krawedzi obrazu*/
+                    }
+                    
+                }
+                else
+                {
+                    if (j==((obraz->wymx)-1))    /*wyjatek dla prawej krawedzi obrazu*/
+                    {
+                        obraz->red [i][j] = (abs(obraz->red [i+1][j]-obraz->red [i][j]));
+                    }
+                    else                /*standardowa sytuacja*/
+                    {
+                        obraz->red [i][j] = (abs(obraz->red [i+1][j]-obraz->red [i][j]) + abs(obraz->red [i][j+1]-obraz->red [i][j]));
+
+                        if (obraz->red [i][j] > obraz->szarosci)    /*moze wystapic sytuacja w ktorej powyzszy wzor odda wart. wieksza niz  */
+                        {                                   /*maksymalna mozliwa, ten if stanowi zabezpieczenie przed czyms takim   */
+                            obraz->red [i][j] = obraz->szarosci; 
+                        }
+                        
+                    }
+                    /*konturowanie wedlug wzoru z pliku obrazy_filtry.pdf, abs (int) to wart. bezwzgledna z int*/
+                } 
+            }
         }
+        }
+        if (obraz->kanal == KANAL || obraz->kanal == GREEN)
+        {
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (i==(obraz->wymy-1))        /*wyjatek dla dolnych krawedzi obrazu*/
+                {
+                    if (j==(obraz->wymx-1))    /*wyjatek dla rogu obrazu*/
+                    {
+                        obraz->green [i][j] = 0;
+                    }
+                    else
+                    {
+                        obraz->green [i][j] = (abs(obraz->green [i][j+1]-obraz->green [i][j])); /*wyjatek dla dolnej krawedzi obrazu*/
+                    }
+                    
+                }
+                else
+                {
+                    if (j==(obraz->wymx-1))    /*wyjatek dla prawej krawedzi obrazu*/
+                    {
+                        obraz->green [i][j] = (abs(obraz->green [i+1][j]-obraz->green [i][j]));
+                    }
+                    else                /*standardowa sytuacja*/
+                    {
+                        obraz->green [i][j] = (abs(obraz->green [i+1][j]-obraz->green [i][j]) + abs(obraz->green [i][j+1]-obraz->green [i][j]));
+
+                        if (obraz->green [i][j] > obraz->szarosci)    /*moze wystapic sytuacja w ktorej powyzszy wzor odda wart. wieksza niz  */
+                        {                                   /*maksymalna mozliwa, ten if stanowi zabezpieczenie przed czyms takim   */
+                            obraz->green [i][j] = obraz->szarosci; 
+                        }
+                        
+                    }
+                    /*konturowanie wedlug wzoru z pliku obrazy_filtry.pdf, abs (int) to wart. bezwzgledna z int*/
+                } 
+            }
+        }    
+        }
+        if (obraz->kanal == KANAL || obraz->kanal == BLUE)
+        {
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (i==(obraz->wymy-1))        /*wyjatek dla dolnych krawedzi obrazu*/
+                {
+                    if (j==(obraz->wymx-1))    /*wyjatek dla rogu obrazu*/
+                    {
+                        obraz->blue [i][j] = 0;
+                    }
+                    else
+                    {
+                        obraz->blue [i][j] = (abs(obraz->blue [i][j+1]-obraz->blue [i][j])); /*wyjatek dla dolnej krawedzi obrazu*/
+                    }
+                    
+                }
+                else
+                {
+                    if (j==(obraz->wymx-1))    /*wyjatek dla prawej krawedzi obrazu*/
+                    {
+                        obraz->blue [i][j] = (abs(obraz->blue [i+1][j]-obraz->blue [i][j]));
+                    }
+                    else                /*standardowa sytuacja*/
+                    {
+                        obraz->blue [i][j] = (abs(obraz->blue [i+1][j]-obraz->blue [i][j]) + abs(obraz->blue [i][j+1]-obraz->blue [i][j]));
+
+                        if (obraz->blue [i][j] > obraz->szarosci)    /*moze wystapic sytuacja w ktorej powyzszy wzor odda wart. wieksza niz  */
+                        {                                   /*maksymalna mozliwa, ten if stanowi zabezpieczenie przed czyms takim   */
+                            obraz->blue [i][j] = obraz->szarosci; 
+                        }
+                        
+                    }
+                    /*konturowanie wedlug wzoru z pliku obrazy_filtry.pdf, abs (int) to wart. bezwzgledna z int*/
+                } 
+            }
+        }    
+        }
+    }
+        
 }
 
 /************************************************************************************

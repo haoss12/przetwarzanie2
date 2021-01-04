@@ -127,6 +127,18 @@ int main(int argc, char **argv) {
             break;
         case 'm':   /*wybor kanalu do pracy > -m [r/g/b]*/
             printf ("kanal  %s\n", optarg);
+            if (strcmp(optarg, "r")==0)
+                {
+                    obraz.kanal= RED;
+                }
+            if (strcmp(optarg, "g")==0)
+                { 
+                    obraz.kanal= GREEN;
+                }
+            if (strcmp(optarg, "b")==0)
+                { 
+                    obraz.kanal= BLUE;
+                }
             break;
         case 'h':   /*pomoc dla uzytkownika > -h*/
             printf("nei pomoge Ci synu \n");

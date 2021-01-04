@@ -213,19 +213,17 @@ void konturowanie(t_obraz *obraz)
         }        
     }
 
-printf("dupa");
-
     if (obraz->typobrazu == PPM)
     {
         if (obraz->kanal == KANAL || obraz->kanal == RED)
         {
+        for (i=0; i<obraz->wymy; ++i)
         {
-            printf("dupa");
             for (j=0; j<obraz->wymx; ++j)
             {
-                if (i==((obraz->wymy)-1))        /*wyjatek dla dolnych krawedzi obrazu*/
+                if (i==(obraz->wymy-1))        /*wyjatek dla dolnych krawedzi obrazu*/
                 {
-                    if (j==((obraz->wymx)-1))    /*wyjatek dla rogu obrazu*/
+                    if (j==(obraz->wymx-1))    /*wyjatek dla rogu obrazu*/
                     {
                         obraz->red [i][j] = 0;
                     }
@@ -237,7 +235,7 @@ printf("dupa");
                 }
                 else
                 {
-                    if (j==((obraz->wymx)-1))    /*wyjatek dla prawej krawedzi obrazu*/
+                    if (j==(obraz->wymx-1))    /*wyjatek dla prawej krawedzi obrazu*/
                     {
                         obraz->red [i][j] = (abs(obraz->red [i+1][j]-obraz->red [i][j]));
                     }
@@ -258,6 +256,7 @@ printf("dupa");
         }
         if (obraz->kanal == KANAL || obraz->kanal == GREEN)
         {
+        for (i=0; i<obraz->wymy; ++i)    
         {
             for (j=0; j<obraz->wymx; ++j)
             {
@@ -296,6 +295,7 @@ printf("dupa");
         }
         if (obraz->kanal == KANAL || obraz->kanal == BLUE)
         {
+        for (i=0; i<obraz->wymy; ++i)
         {
             for (j=0; j<obraz->wymx; ++j)
             {
@@ -424,13 +424,21 @@ void rozmywanie_pion(t_obraz *obraz, int prog, int tabela_temp [][MAX])
  * \param[in] prog prog rozmycia wybrany przez uzytkownika (1 lub 2)                *
  * \param[in] tabela_temp tablica tymczasowa do wykonania operacji                  *
  ************************************************************************************/
-void rozmywanie_poziom(t_obraz *obraz, int prog, int tabela_temp [][MAX])
+void rozmywanie_poziom(t_obraz *obraz, int prog)
 {
     int i, j;   /*rozmywanie jest wykonywane do tabeli tymczasowej (tabela_temp)*/
                 /*po to by pobierane wartosci sie zgadzaly z oczekiwaniami      */
                 /*gdyby nie ten zabieg funkcja pobieralaby wartosci juz rozmyte */
                 /*dla ktorych w dalszej czesci obrazu moglyby pojawiac sie bledy*/
 
+/*alokacja miejsca w pamieci dla tabeli tymczasowej*/
+  obraz->tabela_temp = (int **) malloc((obraz->wymy) * sizeof(int*)); /*alokacja indeksów wierszy*/
+  for (i = 0; i < (obraz->wymy); i++) /*alokacja odpowiedniej liczby kolumn dla wszystkich wierszy*/
+  {
+    obraz->tabela_temp[i] = (int *) malloc((obraz->wymx) * sizeof(int)); 
+  }
+    if (obraz->typobrazu == PGM)
+    {
         if (prog == 1) //pierwszy prog rozmywania
     {
         for (i=0; i<obraz->wymy; ++i)
@@ -439,15 +447,15 @@ void rozmywanie_poziom(t_obraz *obraz, int prog, int tabela_temp [][MAX])
             {
                 if (j==KRAWEDZ)     //wyjatek dla gornej krawedzi obrazu, by funkcja nie pobierala czegos co nie istnieje
                 {
-                tabela_temp[i][j] = (obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j+1])/2;
+                obraz->tabela_temp[i][j] = (obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j+1])/2;
                 }
                 if (j==(obraz->wymx-1))   //wyjatek dla dolnej krawedzi obrazu, jw.
                 {
-                tabela_temp[i][j] = (obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j])/2;
+                obraz->tabela_temp[i][j] = (obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j])/2;
                 }
                 else                //standardowa sytuacja
                 {
-                tabela_temp[i][j] = (obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j+1])/3;  
+                obraz->tabela_temp[i][j] = (obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j+1])/3;  
                 }         
             }
         }
@@ -461,23 +469,23 @@ void rozmywanie_poziom(t_obraz *obraz, int prog, int tabela_temp [][MAX])
             {   
                 if (j==KRAWEDZ)     //wyjatek dla gornej krawedzi obrazu, jw.
                 {
-                tabela_temp[i][j] = (obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j+1]+obraz->obraz_pgm[i][j+2])/3;
+                obraz->tabela_temp[i][j] = (obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j+1]+obraz->obraz_pgm[i][j+2])/3;
                 }
                 if (j==(KRAWEDZ+1)) //wyjatek dla drugiego wiersza obrazu, jw.
                 {
-                tabela_temp[i][j] = (obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j+1]+obraz->obraz_pgm[i][j+2])/4;
+                obraz->tabela_temp[i][j] = (obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j+1]+obraz->obraz_pgm[i][j+2])/4;
                 }
                 if (j==(obraz->wymx-2))   //wyjatek dla przedostatniego wiersza obrazu, jw.
                 {
-                tabela_temp[i][j] = (obraz->obraz_pgm[i][j-2]+obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j]+1)/4;
+                obraz->tabela_temp[i][j] = (obraz->obraz_pgm[i][j-2]+obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j]+1)/4;
                 }
                 if (j==(obraz->wymx-1))   //wyjatek dla dolnej krawedzi obrazu, jw.
                 {
-                tabela_temp[i][j] = (obraz->obraz_pgm[i][j-2]+obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j])/3;
+                obraz->tabela_temp[i][j] = (obraz->obraz_pgm[i][j-2]+obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j])/3;
                 }
                 else                //standardowa sytuacja
                 {
-                tabela_temp[i][j] = (obraz->obraz_pgm[i][j-2]+obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j]+1+obraz->obraz_pgm[i][j+2])/5;  
+                obraz->tabela_temp[i][j] = (obraz->obraz_pgm[i][j-2]+obraz->obraz_pgm[i][j-1]+obraz->obraz_pgm[i][j]+obraz->obraz_pgm[i][j]+1+obraz->obraz_pgm[i][j+2])/5;  
                 }         
             }
         }
@@ -487,8 +495,204 @@ void rozmywanie_poziom(t_obraz *obraz, int prog, int tabela_temp [][MAX])
     {
         for (j=0; j<obraz->wymx; ++j)                 /*czesc funkcji odpowiedzialna za przepisanie              */
         {                                       /*wartosci z tabeli tymczasowej spowrotem do glownej tabeli*/
-        obraz->obraz_pgm [i][j] = tabela_temp[i][j];   /*oraz wyczyszczenie tabeli tymczasowej                    */
-        tabela_temp[i][j] = 0;
+        obraz->obraz_pgm [i][j] = obraz->tabela_temp[i][j];   /*oraz wyczyszczenie tabeli tymczasowej                    */
+        obraz->tabela_temp[i][j] = 0;
+        }
+    }        
+    }
+
+if (obraz->typobrazu == PPM)
+    {
+    if (obraz->kanal == KANAL || obraz->kanal == RED)
+    {
+              if (prog == 1) //pierwszy prog rozmywania
+    {
+        for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (j==KRAWEDZ)     //wyjatek dla gornej krawedzi obrazu, by funkcja nie pobierala czegos co nie istnieje
+                {
+                obraz->tabela_temp[i][j] = (obraz->red[i][j]+obraz->red[i][j+1])/2;
+                }
+                if (j==(obraz->wymx-1))   //wyjatek dla dolnej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->red[i][j-1]+obraz->red[i][j])/2;
+                }
+                else                //standardowa sytuacja
+                {
+                obraz->tabela_temp[i][j] = (obraz->red[i][j-1]+obraz->red[i][j]+obraz->red[i][j+1])/3;  
+                }         
+            }
         }
     }
+
+    if (prog == 2)  //drugi prog rozmywania
+    {
+        for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {   
+                if (j==KRAWEDZ)     //wyjatek dla gornej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->red[i][j]+obraz->red[i][j+1]+obraz->red[i][j+2])/3;
+                }
+                if (j==(KRAWEDZ+1)) //wyjatek dla drugiego wiersza obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->red[i][j-1]+obraz->red[i][j]+obraz->red[i][j+1]+obraz->red[i][j+2])/4;
+                }
+                if (j==(obraz->wymx-2))   //wyjatek dla przedostatniego wiersza obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->red[i][j-2]+obraz->red[i][j-1]+obraz->red[i][j]+obraz->red[i][j]+1)/4;
+                }
+                if (j==(obraz->wymx-1))   //wyjatek dla dolnej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->red[i][j-2]+obraz->red[i][j-1]+obraz->red[i][j])/3;
+                }
+                else                //standardowa sytuacja
+                {
+                obraz->tabela_temp[i][j] = (obraz->red[i][j-2]+obraz->red[i][j-1]+obraz->red[i][j]+obraz->red[i][j]+1+obraz->red[i][j+2])/5;  
+                }         
+            }
+        }
+    }
+
+    for (i=0; i<obraz->wymy; ++i)
+    {
+        for (j=0; j<obraz->wymx; ++j)                 /*czesc funkcji odpowiedzialna za przepisanie              */
+        {                                       /*wartosci z tabeli tymczasowej spowrotem do glownej tabeli*/
+        obraz->red [i][j] = obraz->tabela_temp[i][j];   /*oraz wyczyszczenie tabeli tymczasowej                    */
+        obraz->tabela_temp[i][j] = 0;
+        }
+    }      
+    }
+    if (obraz->kanal == KANAL || obraz->kanal == GREEN)
+    {
+              if (prog == 1) //pierwszy prog rozmywania
+    {
+        for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (j==KRAWEDZ)     //wyjatek dla gornej krawedzi obrazu, by funkcja nie pobierala czegos co nie istnieje
+                {
+                obraz->tabela_temp[i][j] = (obraz->green[i][j]+obraz->green[i][j+1])/2;
+                }
+                if (j==(obraz->wymx-1))   //wyjatek dla dolnej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->green[i][j-1]+obraz->green[i][j])/2;
+                }
+                else                //standardowa sytuacja
+                {
+                obraz->tabela_temp[i][j] = (obraz->green[i][j-1]+obraz->green[i][j]+obraz->green[i][j+1])/3;  
+                }         
+            }
+        }
+    }
+
+    if (prog == 2)  //drugi prog rozmywania
+    {
+        for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {   
+                if (j==KRAWEDZ)     //wyjatek dla gornej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->green[i][j]+obraz->green[i][j+1]+obraz->green[i][j+2])/3;
+                }
+                if (j==(KRAWEDZ+1)) //wyjatek dla drugiego wiersza obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->green[i][j-1]+obraz->green[i][j]+obraz->green[i][j+1]+obraz->green[i][j+2])/4;
+                }
+                if (j==(obraz->wymx-2))   //wyjatek dla przedostatniego wiersza obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->green[i][j-2]+obraz->green[i][j-1]+obraz->green[i][j]+obraz->green[i][j]+1)/4;
+                }
+                if (j==(obraz->wymx-1))   //wyjatek dla dolnej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->green[i][j-2]+obraz->green[i][j-1]+obraz->green[i][j])/3;
+                }
+                else                //standardowa sytuacja
+                {
+                obraz->tabela_temp[i][j] = (obraz->green[i][j-2]+obraz->green[i][j-1]+obraz->green[i][j]+obraz->green[i][j]+1+obraz->green[i][j+2])/5;  
+                }         
+            }
+        }
+    }
+
+    for (i=0; i<obraz->wymy; ++i)
+    {
+        for (j=0; j<obraz->wymx; ++j)                 /*czesc funkcji odpowiedzialna za przepisanie              */
+        {                                       /*wartosci z tabeli tymczasowej spowrotem do glownej tabeli*/
+        obraz->green [i][j] = obraz->tabela_temp[i][j];   /*oraz wyczyszczenie tabeli tymczasowej                    */
+        obraz->tabela_temp[i][j] = 0;
+        }
+    }            
+    }
+    if (obraz->kanal == KANAL || obraz->kanal == BLUE)
+    {
+              if (prog == 1) //pierwszy prog rozmywania
+    {
+        for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {
+                if (j==KRAWEDZ)     //wyjatek dla gornej krawedzi obrazu, by funkcja nie pobierala czegos co nie istnieje
+                {
+                obraz->tabela_temp[i][j] = (obraz->blue[i][j]+obraz->blue[i][j+1])/2;
+                }
+                if (j==(obraz->wymx-1))   //wyjatek dla dolnej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->blue[i][j-1]+obraz->blue[i][j])/2;
+                }
+                else                //standardowa sytuacja
+                {
+                obraz->tabela_temp[i][j] = (obraz->blue[i][j-1]+obraz->blue[i][j]+obraz->blue[i][j+1])/3;  
+                }         
+            }
+        }
+    }
+
+    if (prog == 2)  //drugi prog rozmywania
+    {
+        for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {   
+                if (j==KRAWEDZ)     //wyjatek dla gornej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->blue[i][j]+obraz->blue[i][j+1]+obraz->blue[i][j+2])/3;
+                }
+                if (j==(KRAWEDZ+1)) //wyjatek dla drugiego wiersza obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->blue[i][j-1]+obraz->blue[i][j]+obraz->blue[i][j+1]+obraz->blue[i][j+2])/4;
+                }
+                if (j==(obraz->wymx-2))   //wyjatek dla przedostatniego wiersza obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->blue[i][j-2]+obraz->blue[i][j-1]+obraz->blue[i][j]+obraz->blue[i][j]+1)/4;
+                }
+                if (j==(obraz->wymx-1))   //wyjatek dla dolnej krawedzi obrazu, jw.
+                {
+                obraz->tabela_temp[i][j] = (obraz->blue[i][j-2]+obraz->blue[i][j-1]+obraz->blue[i][j])/3;
+                }
+                else                //standardowa sytuacja
+                {
+                obraz->tabela_temp[i][j] = (obraz->blue[i][j-2]+obraz->blue[i][j-1]+obraz->blue[i][j]+obraz->blue[i][j]+1+obraz->blue[i][j+2])/5;  
+                }         
+            }
+        }
+    }
+
+    for (i=0; i<obraz->wymy; ++i)
+    {
+        for (j=0; j<obraz->wymx; ++j)                 /*czesc funkcji odpowiedzialna za przepisanie              */
+        {                                       /*wartosci z tabeli tymczasowej spowrotem do glownej tabeli*/
+        obraz->blue [i][j] = obraz->tabela_temp[i][j];   /*oraz wyczyszczenie tabeli tymczasowej                    */
+        obraz->tabela_temp[i][j] = 0;
+        }
+    }            
+    }
+    }
+
+
 }

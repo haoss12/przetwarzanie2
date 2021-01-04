@@ -27,6 +27,7 @@ typedef struct {
     int **red;
     int **green;
     int **blue;
+    int **tabela_temp;
 } t_obraz;
 
 

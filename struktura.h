@@ -1,13 +1,13 @@
 #ifndef STRUKTURA_H
 #define STRUKTURA_H
 
-#define MAX 999         /* Maksymalny rozmiar wczytywanego obrazu */
-#define DL_LINII 1024   /* Dlugosc buforow pomocniczych */
-#define KRAWEDZ 0       /* Krawedz obrazu */
-#define PGM 2           /* Definicja typu obrazu */
-#define PPM 3           /* Definicja typu obrazu */
-#define KANAL 0         /* Definicja domyslnego kanalu */
-#define RED 1
+#define MAX 999         /* Maksymalny rozmiar wczytywanego obrazu   */
+#define DL_LINII 1024   /* Dlugosc buforow pomocniczych             */
+#define KRAWEDZ 0       /* Krawedz obrazu                           */
+#define PGM 2           /* Definicja typu obrazu                    */
+#define PPM 3           /* Definicja typu obrazu                    */
+#define KANAL 0         /* Definicja domyslnego kanalu              */
+#define RED 1           /* Definicja flag poszczegolnych kanalow    */
 #define GREEN 2
 #define BLUE 3
 
@@ -19,6 +19,7 @@ typedef struct {
 } t_obraz;
 */
 
+/*Struktura dla obrazow P2 i P3*/
 typedef struct {
     int wymx, wymy, szarosci;
     int typobrazu;

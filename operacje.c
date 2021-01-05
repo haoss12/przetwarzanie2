@@ -7,11 +7,8 @@
 /************************************************************************************
  * Funkcja wczytuje obraz PGM z pliku do tablicy       	       	       	       	    *
  *										                                                              *
- * \param[in] plik_we uchwyt do pliku z obrazem w formacie PGM			                *
- * \param[out] obraz_pgm tablica, do ktorej zostanie zapisany obraz		              *
- * \param[out] wymx szerokosc obrazka						                                    *
- * \param[out] wymy wysokosc obrazka						                                    *
- * \param[out] szarosci liczba odcieni szarosci					                            *
+ * \param[in] plik_we uchwyt do pliku z obrazem w formacie PGM lub PPM              *
+ * \param[out] t_obraz *obraz struktura, do ktorej zostanie zapisany obraz		      *
  * \return liczba wczytanych pikseli						                                    *
  ************************************************************************************/
 
@@ -51,9 +48,9 @@ int czytaj(FILE *plik_we, t_obraz *obraz)
   if (obraz->obraz_pgm != NULL)     /*zwalnianie pamieci, jesli byla wczesniej zaalokowana*/
   {                                 /*taka sytuacja moze nastapic gdy wczytujemy obraz do pamieci*/
     for(i=0; i<obraz->wymy; i++){   /*kolejny, n-ty raz*/
-          free(obraz->obraz_pgm[i]);    /*zwolnienie poszczegolnych wierszy*/
-        }
-        free(obraz->obraz_pgm);         /*zwolnienie indeksow*/
+        free(obraz->obraz_pgm[i]);    /*zwolnienie poszczegolnych wierszy*/
+    }
+    free(obraz->obraz_pgm);         /*zwolnienie indeksow*/
   }
 
   /* Pobranie wymiarow obrazu i liczby odcieni szarosci */
@@ -86,7 +83,7 @@ int czytaj(FILE *plik_we, t_obraz *obraz)
   if ( (buf[0]=='P') && (buf[1]=='3')) {  /* Czy jest magiczne "P3"? */
     obraz->typobrazu = PPM;
     obraz->kanal = KANAL;
-    
+
     /* Pominiecie komentarzy */
   do {
     if ((znak=fgetc(plik_we))=='#') {         /* Czy linia rozpoczyna sie od znaku '#'? */
@@ -169,10 +166,7 @@ int czytaj(FILE *plik_we, t_obraz *obraz)
  * Funckja zapisujaca plik pod wybrana przez uzytkownika nazwa 	       	       	    *
  *										                                                              *
  * \param[out] plik_wy uchwyt do pliku do zapisu obrazu w PGM			                  *
- * \param[in] obraz_pgm tablica, w ktorej znajduje sie obraz do zapisu	            *
- * \param[in] wymx szerokosc obrazka						                                    *
- * \param[in] wymy wysokosc obrazka				    		                                  *
- * \param[in] szarosci liczba odcieni szarosci					                            *
+ * \param[in] t_obraz *obraz struktura, z ktorej zostanie pobrany obraz do zapisu   *
  * \return (0) dla bledu, 1 dla poprawnej sytuacji			                            *
  ************************************************************************************/
 int zapisz(FILE *plik_wy, t_obraz *obraz)
@@ -235,7 +229,7 @@ void wyswietl(char *n_pliku)
   system(polecenie);             /* wykonanie polecenia        */
 }
 
-/*Funkcja czyszczaca terminal dla wiekszej czytelnosci menu*/
+/*Funkcja czyszczaca terminal dla wiekszej czytelnosci menu, nieuzywana przy menu liniowym*/
 void wyczysc()
 {
   char polecenie[DL_LINII];     /*bufor pomocniczy do zestawienia polecenia */
@@ -253,4 +247,42 @@ void usun()
   strcat(polecenie,"temp.pgm ");    /* rm "nazwa_pliku" &       */
   strcat(polecenie," &");
   system(polecenie);            /*wykonanie polecenia           */
+}
+
+/************************************************************************************
+ * Funkcja zerujaca strukture do przechowywania obrazu         	       	       	    *
+ *										                                                              *
+ * \param[in] t_obraz *obraz struktura ktora bedzie zerowana przez funkcje          *
+ ************************************************************************************/
+void zeruj(t_obraz *obraz)
+{
+  obraz->obraz_pgm=NULL;
+  obraz->red=NULL;
+  obraz->green=NULL;
+  obraz->blue=NULL;
+  obraz->tabela_temp=NULL;
+  obraz->szarosci=0;
+  obraz->wymx=0;
+  obraz->wymy=0;
+  obraz->typobrazu=0;
+  obraz->kanal=0;
+}
+
+/*Funkcja wyswietlajaca pomoc dla uzytkownika, wyizolowana dla wiekszej czytelnosci kodu w main*/
+void pomoc()
+{
+  puts("");
+  puts("  wczytanie pliku w formacie pgm/ppm (nalezy pamietac o rozszerzeniu) > -i [nazwa pliku]");
+  puts("  uzycie "-" jako nazwy pliku spowoduje uzycie standardowego wejscia stdin");
+  puts("  zapis pliku w formacie pgm/ppm (nalezy pamietac o rozszerzeniu) > -o [nazwa pliku]");
+  puts("  uzycie "-" jako nazwy pliku spowoduje uzycie standardowego wyjscia stdout");
+  puts("  rozmywanie obrazu w stopniu wybranym przez uzytkownika > -r [1/2]");
+  puts("  progowanie obrazu w wybranym przez uzytkownika miejscu > -p [0-100]");
+  puts("  negatyw obrazu > -n");
+  puts("  konturowanie obrazu > -k");
+  puts("  konwersja obrazu ppm do pgm > -c");
+  puts("  wyswietlenie obrazu przy uzyciu f. display > -d");
+  puts("  wybor kanalu do pracy, domyslnie ustawione jako a, dla wszystkich kanalow > -m [r/g/b/a]");
+  puts("  pomoc dla uzytkownika > -h");
+  puts("");
 }

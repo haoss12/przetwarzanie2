@@ -8,5 +8,8 @@ int zapisz(FILE *plik_wy, t_obraz *obraz);
 void wyswietl(char *n_pliku);
 void wyczysc();
 void usun();
+void zeruj(t_obraz *obraz);
+void pomoc();
+
 
 #endif 

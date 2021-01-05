@@ -7,10 +7,7 @@
 /************************************************************************************
  * Funkcja wykonujaca negatyw na wczytanym pliku       	       	       	       	    *
  *										                                            *
- * \param[in] obraz_pgm tablica, w ktorej znajduje sie wczytany obraz      		    *
- * \param[in] wymx szerokosc obrazka						                        *
- * \param[in] wymy wysokosc obrazka						                            *
- * \param[in] szarosci liczba odcieni szarosci					                    *
+ * \param[in] t_obraz *obraz struktura przechowujaca dane o obrazie    		        *
  *                                  						                        *
  ************************************************************************************/
 
@@ -68,10 +65,7 @@ void negatyw(t_obraz *obraz)
  * Funkcja wykonujaca progowanie na wczytanym pliku                                 *
  * dla zadanego przez uzytkownika procentu      	       	       	       	        *
  *										                                            *
- * \param[in] obraz_pgm tablica, w ktorej znajduje sie wczytany obraz      		    *
- * \param[in] wymx szerokosc obrazka						                        *
- * \param[in] wymy wysokosc obrazka						                            *
- * \param[in] szarosci liczba odcieni szarosci					                    *
+ * \param[in] t_obraz *obraz struktura przechowujaca dane o obrazie    		        *
  * \param[in] procprog wprowadzony przez uzytkownika prog                           *
  ************************************************************************************/
 
@@ -163,11 +157,8 @@ void progowanie(t_obraz *obraz, int procprog)
 /************************************************************************************
  * Funkcja wykonujaca konturowanie na wczytanym pliku       	       	       	    *
  *										                                            *
- * \param[in] obraz_pgm tablica, w ktorej znajduje sie wczytany obraz      		    *
- * \param[in] wymx szerokosc obrazka						                        *
- * \param[in] wymy wysokosc obrazka						                            *
- * \param[in] szarosci liczba odcieni szarosci					                    *
- * 					                                                                *
+ * \param[in] t_obraz *obraz struktura przechowujaca dane o obrazie    		        *
+ *                                  						                        *
  ************************************************************************************/
 
 void konturowanie(t_obraz *obraz)
@@ -338,12 +329,11 @@ void konturowanie(t_obraz *obraz)
 
 /************************************************************************************
  * Funkcja wykonujaca rozmywanie pionowe na wczytanym pliku                         *
- *                                                 	       	       	       	        *
- * \param[in] obraz_pgm tablica, w ktorej znajduje sie wczytany obraz      		    *
- * \param[in] wymx szerokosc obrazka						                        *
- * \param[in] wymy wysokosc obrazka						                            *
+ *										                                            *
+ * PORZUCONA FUNCKJA, UZYWANE JEST TYLKO JEDNO ROZMYWANIE                           *
+ *										                                            *
+ * \param[in] t_obraz *obraz struktura przechowujaca dane o obrazie    		        *
  * \param[in] prog prog rozmycia wybrany przez uzytkownika (1 lub 2)                *
- * \param[in] tabela_temp tablica tymczasowa do wykonania operacji                  *
  ************************************************************************************/
 void rozmywanie_pion(t_obraz *obraz, int prog, int tabela_temp [][MAX])
 {
@@ -417,12 +407,9 @@ void rozmywanie_pion(t_obraz *obraz, int prog, int tabela_temp [][MAX])
 
 /************************************************************************************
  * Funkcja wykonujaca rozmywanie poziome na wczytanym pliku                         *
- *                                                 	       	       	       	        *
- * \param[in] obraz_pgm tablica, w ktorej znajduje sie wczytany obraz      		    *
- * \param[in] wymx szerokosc obrazka						                        *
- * \param[in] wymy wysokosc obrazka						                            *
+ *										                                            *
+ * \param[in] t_obraz *obraz struktura przechowujaca dane o obrazie    		        *
  * \param[in] prog prog rozmycia wybrany przez uzytkownika (1 lub 2)                *
- * \param[in] tabela_temp tablica tymczasowa do wykonania operacji                  *
  ************************************************************************************/
 void rozmywanie_poziom(t_obraz *obraz, int prog)
 {
@@ -695,4 +682,30 @@ if (obraz->typobrazu == PPM)
     }
 
 
+}
+
+/************************************************************************************
+ * Funkcja wykonujaca konwersje pliku PPM do PGM                                    *
+ *										                                            *
+ * \param[in] t_obraz *obraz struktura przechowujaca dane o obrazie    		        *
+ ************************************************************************************/
+void konwersja(t_obraz *obraz)
+{
+int i, j;
+
+/*alokacja miejsca w pamieci dla obrazu*/
+  obraz->obraz_pgm = (int **) malloc((obraz->wymy) * sizeof(int*)); /*alokacja indeksów wierszy*/
+  for (i = 0; i < (obraz->wymy); i++) /*alokacja odpowiedniej liczby kolumn dla wszystkich wierszy*/
+  {
+    obraz->obraz_pgm[i] = (int *) malloc((obraz->wymx) * sizeof(int)); 
+  }
+  
+    for (i=0; i<obraz->wymy; ++i)
+        {
+            for (j=0; j<obraz->wymx; ++j)
+            {       /*konwersja obrazu to wyciagniecie sredniej arytmetycznej z kazdego kanalu kazdego piksela*/
+               obraz->obraz_pgm[i][j] = ((obraz->red[i][j]) + (obraz->green[i][j]) + (obraz->blue[i][j]))/3;        
+            }
+        }
+        obraz->typobrazu = PGM; /*zmiana typu pliku znajdujacego sie w pamieci*/
 }
